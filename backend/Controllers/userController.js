@@ -55,7 +55,7 @@ export const Login = async(req,res) => {
 
       })
     }
-    const isMatch= await bcryptjs.compare(password,user.password);
+    const isMatch= await bcryptjs.compare(user.password,password);
     if(!isMatch){
       return res.status(401).json({
         message:"Incorrect email or password",
@@ -75,4 +75,62 @@ export const Login = async(req,res) => {
   }catch(error){
     console.log(error);
   } 
+}
+
+export  const Logout =(req,res) => {
+  return res.cookie("token","",{expiresIn:new Date(Date.now())}).json({
+    message:"user logged out successfully",
+    success: true
+  })
+}
+
+export const bookmark=async(req,res)=> {
+  try{
+      const loggedInUserId=req.body.id;
+      const tweetId= req.params.id;
+      const tweet=await Tweet.findById(tweetId);
+  if(tweet.bookmarks.include(loggedInUserId)){
+      await Tweet.findByIdAndUpdate(tweetId,{$pull:{bookmarks:loggedInUserId}});
+      return res.status(200).json({
+          message:"Removed from bookmarks. "
+      }) 
+
+  }
+  else{
+      await Tweet.findByIdAndUpdate(tweetId,{$push:{bookmarks:loggedInUserId}});
+      return res.status(200).json({
+          message:"Saved to bookmarks."
+      }) 
+
+  }
+  }catch(error){
+      console.log(error);
+  }
+}
+export const getMyProfile= async(req,res)=>{
+  try{
+    const id=req.params.id;
+    const user=await User.findById(id).select("-password");
+    return res.status(200).json({
+      user
+    })
+  }catch(error){
+    console.log(error);
+  }
+}
+export const getOtherUsers= async(req,res)=>{
+  try{
+    const { id }=req.params.id;
+    const OtherUsers=await User.findById({_id:{$ne:id}}).select("-password");
+    if(!OtherUsers){
+     return res.status(401).json({
+      message: "Currently do not have any users."
+     })
+    };
+    return res.status(200).json({
+      user
+    })
+  }catch(error){
+    console.log(error);
+  }
 }
