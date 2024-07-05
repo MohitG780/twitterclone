@@ -1,6 +1,7 @@
 import { User } from "../models/userSchema.js"
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { Tweet } from "../models/tweetSchema.js";
 
 export const Register =async (req,res) =>{
     try {
@@ -88,16 +89,16 @@ export const bookmark=async(req,res)=> {
   try{
       const loggedInUserId=req.body.id;
       const tweetId= req.params.id;
-      const tweet=await Tweet.findById(tweetId);
-  if(tweet.bookmarks.include(loggedInUserId)){
-      await Tweet.findByIdAndUpdate(tweetId,{$pull:{bookmarks:loggedInUserId}});
+      const  user=await User.findById(loggedInUserId);
+  if(user.bookmarks.include(tweetId)){
+      await User.findByIdAndUpdate(loggedInUserId,{$pull:{bookmarks:tweetId}});
       return res.status(200).json({
           message:"Removed from bookmarks. "
       }) 
 
   }
   else{
-      await Tweet.findByIdAndUpdate(tweetId,{$push:{bookmarks:loggedInUserId}});
+      await Tweet.findByIdAndUpdate(loggedInUserId,{$push:{bookmarks:tweetId}});
       return res.status(200).json({
           message:"Saved to bookmarks."
       }) 
@@ -129,6 +130,53 @@ export const getOtherUsers= async(req,res)=>{
     };
     return res.status(200).json({
       user
+    })
+  }catch(error){
+    console.log(error);
+  }
+}
+export const follow =async(req,res)=>{
+  try{
+    const loggedInUserId=req.body.id;
+    const userId= req.params.id;
+    const loggedInUser=await User.findById(loggedInUserId);
+    const user=await User.findById(userId);
+    if(!user.followers.includes(loggedInUserId)){
+      await user.updateOne({$push:{followers:loggedInUser}});
+      await loggedInUser.updateOne({$push:{following:user}});
+    }
+    else{
+      return res.status(400).json({
+        message:`User already followed to ${user.name}`
+      })
+    };
+    return res.status(200).json({
+      message:`${loggedInUser.name} just follow to ${user.name}`,
+      success:true
+    })
+  }catch(error){
+    console.log(error);
+  }
+}
+
+export const unfollow =async(req,res)=>{
+  try{
+    const loggedInUserId=req.body.id;
+    const userId= req.params.id;
+    const loggedInUser=await User.findById(loggedInUserId);
+    const user=await User.findById(userId);
+    if(user.following.includes(loggedInUserId)){
+      await user.updateOne({$pull:{followers:loggedInUser}});
+      await loggedInUser.updateOne({$pull:{following:user}});
+    }
+    else{
+      return res.status(400).json({
+        message:"User has not followed yet" 
+     })
+    };
+    return res.status(200).json({
+      message:`${loggedInUser.name} unfollow to ${user.name}`,
+      success:true
     })
   }catch(error){
     console.log(error);

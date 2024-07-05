@@ -1,4 +1,5 @@
 import {Tweet } from "../models/tweetSchema";
+import { User } from "../models/userSchema";
  export const CreateTweet = async(req,res)=>{
     try{
         const {description,id}=req.body;
@@ -59,3 +60,34 @@ import {Tweet } from "../models/tweetSchema";
         console.log(error);
     }
  }
+ export const getAllTweets =async(req,res)=>{
+    try{
+      const id=req.params.id;
+      const loggedInUser=await User.findById(id);
+      const loggedInUserTweets=await Tweet.findById({userId:id});
+      const followingUserTweet=await Promise.all(loggedInUser.following.map((otherUsersId)=>{
+        return Tweet.find({userId:otherUsersId})
+      }));
+      return res.status(200).json({
+        tweets:loggedInUserTweets.concat(...followingUserTweet)
+      })
+    }catch(error){
+      console.log(error);
+    }
+  }
+
+  export const getFollowingTweets =async(req,res)=>{
+    try{
+      const id=req.params.id;
+      const loggedInUser=await User.findById(id);
+      const loggedInUserTweets=await Tweet.findById({userId:id});
+      const followingUserTweet=await Promise.all(loggedInUser.following.map((otherUsersId)=>{
+        return Tweet.find({userId:otherUsersId})
+      }));
+      return res.status(200).json({
+        tweets:[].concat(...followingUserTweet)
+      })
+    }catch(error){
+      console.log(error);
+    }
+  }
