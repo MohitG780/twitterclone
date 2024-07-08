@@ -1,5 +1,5 @@
-import {Tweet } from "../models/tweetSchema";
-import { User } from "../models/userSchema";
+import {Tweet } from "../models/tweetSchema.js";
+import { User } from "../models/userSchema.js";
  export const CreateTweet = async(req,res)=>{
     try{
         const {description,id}=req.body;
@@ -24,7 +24,7 @@ import { User } from "../models/userSchema";
  }
  export const deleteTweet =async (req,res) => {
     try{
-        const{id} =req.params;
+        const {id} =req.params;
         await Tweet.findByIdAndDelete(id);
         return res.status(200).json({
            message:"Tweet deleted successfully",
@@ -42,7 +42,7 @@ import { User } from "../models/userSchema";
         const loggedInUserId=req.body.id;
         const tweetId= req.params.id;
         const tweet=await Tweet.findById(tweetId);
-    if(tweet.like.include(loggedInUserId)){
+    if(tweet.like.includes(loggedInUserId)){
         await Tweet.findByIdAndUpdate(tweetId,{$pull:{like:loggedInUserId}});
         return res.status(200).json({
             message:"User disliked your tweet. "
@@ -52,7 +52,7 @@ import { User } from "../models/userSchema";
     else{
         await Tweet.findByIdAndUpdate(tweetId,{$push:{like:loggedInUserId}});
         return res.status(200).json({
-            message:"User liked your tweet. "
+            message:"User liked your tweet."
         }) 
 
     }

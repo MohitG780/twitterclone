@@ -2,7 +2,7 @@ import express from "express";
 import { Register,Login, Logout, bookmark, getMyProfile, getOtherUsers, unfollow, follow } from "../Controllers/userController.js";
 import isAuth from "../config/auth.js";
 
-const router= express.Router();
+const router =express.Router();
  router.route("/register").post(Register);
  router.route("/login").post(Login);
 router.route("/logout").get(Logout);

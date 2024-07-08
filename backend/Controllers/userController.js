@@ -5,8 +5,8 @@ import { Tweet } from "../models/tweetSchema.js";
 
 export const Register =async (req,res) =>{
     try {
-      const {name,username,email,password}= req.body;
-      if(!name||!username||!email||!password){
+      const {name, username, email, password}= req.body;
+      if(!name || !username || !email || !password){
         return res.status(401).json({
             message:"All Fields Are Required",
             success:false
@@ -19,8 +19,8 @@ export const Register =async (req,res) =>{
             success:false
       })}
 
-      const hashedPassword = await bcryptjs.hash(password,16);
-
+      const hashedPassword = await bcryptjs.hash(password,12);
+      
       await User.create({
         name,
         username,
@@ -56,7 +56,7 @@ export const Login = async(req,res) => {
 
       })
     }
-    const isMatch= await bcryptjs.compare(user.password,password);
+    const isMatch= await bcryptjs.compare(password,user.password);
     if(!isMatch){
       return res.status(401).json({
         message:"Incorrect email or password",
@@ -90,7 +90,7 @@ export const bookmark=async(req,res)=> {
       const loggedInUserId=req.body.id;
       const tweetId= req.params.id;
       const  user=await User.findById(loggedInUserId);
-  if(user.bookmarks.include(tweetId)){
+  if(user.bookmarks.includes(tweetId)){
       await User.findByIdAndUpdate(loggedInUserId,{$pull:{bookmarks:tweetId}});
       return res.status(200).json({
           message:"Removed from bookmarks. "
@@ -98,7 +98,7 @@ export const bookmark=async(req,res)=> {
 
   }
   else{
-      await Tweet.findByIdAndUpdate(loggedInUserId,{$push:{bookmarks:tweetId}});
+      await User.findByIdAndUpdate(loggedInUserId,{$push:{bookmarks:tweetId}});
       return res.status(200).json({
           message:"Saved to bookmarks."
       }) 
@@ -119,17 +119,17 @@ export const getMyProfile= async(req,res)=>{
     console.log(error);
   }
 }
-export const getOtherUsers= async(req,res)=>{
+export const getOtherUsers= async(req,res) => {
   try{
-    const { id }=req.params.id;
-    const OtherUsers=await User.findById({_id:{$ne:id}}).select("-password");
-    if(!OtherUsers){
+    const {id}=req.params;
+    const otherUsers=await User.find({_id:{$ne:id}}).select("-password");
+    if(!otherUsers){
      return res.status(401).json({
       message: "Currently do not have any users."
      })
     };
     return res.status(200).json({
-      user
+    otherUsers
     })
   }catch(error){
     console.log(error);
