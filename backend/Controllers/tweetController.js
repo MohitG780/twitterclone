@@ -64,7 +64,7 @@ import { User } from "../models/userSchema.js";
     try{
       const id=req.params.id;
       const loggedInUser=await User.findById(id);
-      const loggedInUserTweets=await Tweet.findById({userId:id});
+      const loggedInUserTweets=await Tweet.find({userId:id});
       const followingUserTweet=await Promise.all(loggedInUser.following.map((otherUsersId)=>{
         return Tweet.find({userId:otherUsersId})
       }));
@@ -80,7 +80,7 @@ import { User } from "../models/userSchema.js";
     try{
       const id=req.params.id;
       const loggedInUser=await User.findById(id);
-      const loggedInUserTweets=await Tweet.findById({userId:id});
+      const loggedInUserTweets=await Tweet.find({userId:id});
       const followingUserTweet=await Promise.all(loggedInUser.following.map((otherUsersId)=>{
         return Tweet.find({userId:otherUsersId})
       }));
