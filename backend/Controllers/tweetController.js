@@ -48,6 +48,7 @@ import { User } from "../models/userSchema.js";
         await Tweet.findByIdAndUpdate(tweetId,{$pull:{like:loggedInUserId}});
         return res.status(200).json({
             message:"User disliked your tweet. "
+          
         }) 
 
     }
